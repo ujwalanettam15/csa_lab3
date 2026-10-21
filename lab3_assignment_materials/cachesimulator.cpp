@@ -94,9 +94,9 @@ class cache
     
 
 public:
-    cache(int L1blocksize, int L1_associativity, int L1_sizekib, int L2blocksize, int L2_associativity){
-        // initialize the cache according to cache parameters
-
+    cache(int L1blocksize, int L1_associativity, int L1_size_val,
+          int L2blocksize, int L2_associativity, int L2_size_val){
+        
     }
 
     auto write(auto addr){
