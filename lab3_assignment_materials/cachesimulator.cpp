@@ -96,7 +96,38 @@ class cache
 public:
     cache(int L1blocksize, int L1_associativity, int L1_size_val,
           int L2blocksize, int L2_associativity, int L2_size_val){
-        
+        //calculate the num of blocks each cache can hold 
+        int l1_num_blocks = (L1_size_val * 1024) / L1blocksize;
+        int l2_num_blocks = (L2_size_val * 1024) / L2blocksize; 
+
+        if(L1_associativity == 0) {
+            l1_way = l1_num_blocks;
+        }
+        else {
+            l1_way = L1_associativity;
+        }
+        if(L2_associativity == 0) {
+            l2_way = l2_num_blocks;
+        }
+        else {
+            l2_way = L2_associativity;
+        }
+
+        l1_set = l1_num_blocks / l1_way;
+        l2_set = l2_num_blocks / l2_way;
+
+        l1_offset = (int)log2(L1blocksize);
+        l2_offset = (int)log2(L2blocksize);
+        l1_index = (int)log2(l1_set);
+        l2_index = (int)log2(l2_set);
+
+        set l1_copy_temp;
+        l1_copy_temp.cb_val.resize(l1_way);
+        l1.assign(l1_set, l1_copy_temp);
+
+        set l2_copy_temp;
+        l2_copy_temp.cb_val.resize(l2_way);
+        l2.assign(l2_set, l2_copy_temp);
     }
 
     auto write(auto addr){
@@ -109,6 +140,7 @@ public:
 
         return WH or WM
         */
+       
     }
 
     auto writeL2(auto addr){
