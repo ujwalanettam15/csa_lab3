@@ -133,6 +133,7 @@ public:
     auto write(auto addr){
         /*
         step 1: select the set in our L1 cache using set index bits
+
         step 2: iterate through each way in the current set
             - If Matching tag and Valid Bit High -> WriteHit!
                                                     -> Dirty Bit High
@@ -155,18 +156,28 @@ public:
         */
     }
 
-    auto readL1(auto addr){
+    auto readL1(unsigned int addr){
         /*
         step 1: select the set in our L1 cache using set index bits
         step 2: iterate through each way in the current set
             - If Matching tag and Valid Bit High -> ReadHit!
         step 3: Otherwise? -> ReadMiss!
-
         return RH or RM
         */
+       unsigned int index = addr >> l1_offset & ((1u << l1_index) - 1);
+       unsigned int tag = addr >> (l1_offset + l1_index);
+       set s = l1[index];
+       for (int i=0; i < s.cb_val.size(); i++) {
+            if (s.cb_val[i].tag == tag) {
+                if (s.cb_val[i].valid_bit) {
+                    return RH;
+                }
+            } 
+       }
+       return RM;  
     }
 
-    auto readL2(auto addr){
+    auto readL2(unsigned int addr){
         /*
         step 1: select the set in our L2 cache using set index bits
         step 2: iterate through each way in the current set
@@ -181,6 +192,18 @@ public:
 
         return {RM or RH, WRITEMEM or NOWRITEMEM}
         */
+       unsigned int index = addr >> l1_offset & ((1u << l1_index) - 1);
+       unsigned int tag = addr >> (l1_offset + l1_index);
+       set s = l2[index];
+       for (int i=0; i < s.cb_val.size(); i++) {
+            if (s.cb_val[i].tag == tag) {
+                if (s.cb_val[i].valid_bit) {
+                    return RH;
+                }
+            } 
+       }
+       
+       
     }
 };
 
