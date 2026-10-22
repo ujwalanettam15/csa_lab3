@@ -130,7 +130,7 @@ public:
         l2.assign(l2_set, l2_copy_temp);
     }
 
-    auto write(auto addr){
+    int write(unsigned int addr){
         /*
         step 1: select the set in our L1 cache using set index bits
 
@@ -141,10 +141,20 @@ public:
 
         return WH or WM
         */
-       
+       unsigned int block_add = addr >> l2_offset;
+       unsigned int index = block_add % l2_set;
+       unsigned int tag = block_add / l2_set;
+
+       for(int way = 0; way < l2_way; way++) {
+            if(l2[index].cb_val[way].valid_bit && l2[index].cb_val[way].tag == tag) {
+                l2[index].cb_val[way].dirty_bit = true;
+                return WH;
+            }
+    }
+        return WM;
     }
 
-    auto writeL2(auto addr){
+    int writeL2(unsigned int addr){
         /*
         step 1: select the set in our L2 cache using set index bits
         step 2: iterate through each way in the current set
