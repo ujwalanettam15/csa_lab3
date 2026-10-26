@@ -141,16 +141,16 @@ public:
 
         return WH or WM
         */
-       unsigned int block_add = addr >> l2_offset;
-       unsigned int index = block_add % l2_set;
-       unsigned int tag = block_add / l2_set;
+        unsigned int block_add = addr >> l1_offset;
+        unsigned int set_index = block_add % l1_set;
+        unsigned int matching_tag = block_add / l1_set;
 
-       for(int way = 0; way < l2_way; way++) {
-            if(l2[index].cb_val[way].valid_bit && l2[index].cb_val[way].tag == tag) {
-                l2[index].cb_val[way].dirty_bit = true;
+        for(int way = 0; way < l1_way; way++) {
+            if(l1[set_index].cb_val[way].valid_bit && l1[set_index].cb_val[way].tag == matching_tag) {
+                l1[set_index].cb_val[way].dirty_bit = true;
                 return WH;
             }
-    }
+        }
         return WM;
     }
 
@@ -164,6 +164,17 @@ public:
 
         return {WM or WH, WRITEMEM or NOWRITEMEM}
         */
+       unsigned int block_add = addr >> l2_offset;
+       unsigned int set_index = block_add % l2_set;
+       unsigned int matching_tag = block_add / l2_set;
+
+       for(int way = 0; way < l2_way; way++) {
+            if(l2[set_index].cb_val[way].valid_bit && l2[set_index].cb_val[way].tag == matching_tag) {
+                l2[set_index].cb_val[way].dirty_bit = true;
+                return WH;
+            }
+    }
+        return WM;
     }
 
     auto readL1(unsigned int addr){
